@@ -6,13 +6,24 @@ if [ ! -d "$LFS/sources" ]; then
 	chmod -v a+wt $LFS/sources
 fi
 
-if [ ! -f "$LFS/sources/wget-list" ]; then
-    echo -e "${GREEN}[Fetching wget-list]${NC}"
-    wget "https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/wget-list" --continue --directory-prefix=$LFS/sources
-    wget "https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/md5sums" --continue --directory-prefix=$LFS/sources
-    cd $LFS/sources
-    wget --input-file=wget-list --continue --directory-prefix=$LFS/sources
+rm -rf $LFS/sources/wget-list
+rm -rf $LFS/sources/md5sums
+
+echo -e "${GREEN}[Fetching wget-list]${NC}"
+wget "https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/wget-list" --continue --directory-prefix=$LFS/sources
+wget "https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/md5sums" --continue --directory-prefix=$LFS/sources
+cd $LFS/sources
+pushd $LFS/sources
+md5sum -c md5sums
+if [ $? -ne 0 ]; then
+    echo "Some checksums failed, downloading packages..."
+	wget --input-file=wget-list --continue --directory-prefix=$LFS/sources
+    # run wget or your download script here
+else
+    echo "All source checksums OK, skipping download."
 fi
+popd
+
 
 chown root:root $LFS/sources/*
 
