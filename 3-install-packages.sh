@@ -29,33 +29,32 @@ echo -e "${GREEN}[Binutils installed]${NC}"
 echo -e "${GREEN}[Installing packages]${NC}"
 # Binutils
 {
-	tar -xf binutils-2.30.tar.xz > /dev/null 2>&1 && \
-	cd binutils-2.30 && \
-	create_build_dir > /dev/null 2>&1 && \
+	tar -xf binutils-2.30.tar.xz > /dev/null
+	cd binutils-2.30
+	create_build_dir
 	../configure --prefix=/tools \
 		--with-sysroot=$LFS \
 		--with-lib-path=/tools/lib \
 		--target=$LFS_TGT \
 		--disable-nls \
-		--disable-werror > /dev/null 2>&1 && \
-	make > /dev/null 2>&1 && \
-	make install > /dev/null 2>&1 && \
+		--disable-werror
+	make
+	make install
 	clean_up binutils-2.30
-} && \
-echo -e "${GREEN}[Binutils installed]${NC}" \
-|| echo -e "${RED}[Binutils build FAILED]${NC}"
+}
+echo -e "${GREEN}[Binutils installed]${NC}"
 
 # Cross GCC
 {
-	tar -xf gcc-7.3.0.tar.xz > /dev/null 2>&1 && \
+	tar -xf gcc-7.3.0.tar.xz
 	cd gcc-7.3.0 && \
-	tar -xf ../mpfr-4.0.1.tar.xz > /dev/null 2>&1 && \
+	tar -xf ../mpfr-4.0.1.tar.xz
 	mv -v mpfr-4.0.1 mpfr && \
-	tar -xf ../gmp-6.1.2.tar.xz > /dev/null 2>&1 && \
+	tar -xf ../gmp-6.1.2.tar.xz
 	mv -v gmp-6.1.2 gmp && \
-	tar -xf ../mpc-1.1.0.tar.gz > /dev/null 2>&1 && \
+	tar -xf ../mpc-1.1.0.tar.gz
 	mv -v mpc-1.1.0 mpc && \
-	create_build_dir > /dev/null 2>&1 && \
+	create_build_dir
 	for file in gcc/config/{linux,i386/linux{,64}}.h
 		do
 		cp -uv $file{,.orig}
@@ -74,7 +73,7 @@ echo -e "${GREEN}[Binutils installed]${NC}" \
 			-i.orig gcc/config/i386/t-linux64
 	;;
 	esac
-	create_build_dir > /dev/null 2>&1 && \
+	create_build_dir
 	../configure \
 		--target=$LFS_TGT \
 		--prefix=/tools \
@@ -96,10 +95,9 @@ echo -e "${GREEN}[Binutils installed]${NC}" \
 		--disable-libssp \
 		--disable-libvtv \
 		--disable-libstdcxx \
-		--enable-languages=c,c++ > /dev/null 2>&1 && \
-	make > /dev/null 2>&1 && \
-	make install > /dev/null 2>&1 && \
+		--enable-languages=c,c++
+	make
+	make install
 	clean_up gcc-7.3.0
-} && \
-echo -e "${GREEN}[GCC installed]${NC}" \
-|| echo -e "${RED}[GCC build FAILED]${NC}"
+}
+echo -e "${GREEN}[GCC installed]${NC}"
