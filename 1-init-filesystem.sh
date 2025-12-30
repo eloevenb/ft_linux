@@ -4,6 +4,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+
 DISK="/dev/sda"
 SWAP_PART="/dev/sda3"
 BOOT_PART="/dev/sda1"
@@ -68,27 +69,35 @@ mkdir -v $LFS/boot
 mount -v -t ext4 "${BOOT_PART}" $LFS/boot
 swapon -v "${SWAP_PART}"
 
-if [ ! -d "$LFS/sources" ]; then
-	echo -e "${GREEN}[Creating sources directory]${NC}"
-	mkdir -v $LFS/sources
-	chmod -v a+wt $LFS/sources
-fi
+mkdir -pv $LFS/{etc,var} $LFS/usr/{bin,lib,sbin} $LFS/tools $LFS/scripts
+ln -sv $LFS/tools /
 
-if [ ! -f "$LFS/sources/wget-list" ]; then
-    echo -e "${GREEN}[Fetching wget-list]${NC}"
-    wget "https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/wget-list" --continue --directory-prefix=$LFS/sources
-    wget "https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/md5sums" --continue --directory-prefix=$LFS/sources
-    echo -e "${YELLOW}[Patching ftp.gnu.org URLs to ftpmirror.gnu.org]${NC}"
-    sed -i 's|ftp.gnu.org|ftpmirror.gnu.org|g' $LFS/sources/wget-list
-    cd $LFS/sources
-    wget --input-file=wget-list --continue --directory-prefix=$LFS/sources
-fi
+for i in bin lib sbin; do
+	ln -sv ../usr/$i $LFS/$i
+done
 
-chown root:root $LFS/sources/*
+case $(uname -m) in
+	x86_64) ln -sv lib $LFS/lib64 ;;
+esac
 
-echo -e "${GREEN}[Verifying source file checksums]${NC}"
-pushd $LFS/sources
-md5sum -c md5sums
-popd
+groupadd lfs
+useradd -s /bin/bash -g lfs -m -k /dev/null lfs
 
+passwd lfs << EOF
+lfs
+EOF
 
+echo -e "${GREEN}Created user lfs:lfs${NC}"
+
+chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
+case $(uname -m) in
+  x86_64) chown -v lfs $LFS/lib64 ;;
+esac
+
+cd $LFS/scripts
+git clone https://github.com/eloevenb/ft_linux.git .
+cd
+chown -R lfs:lfs /mnt/lfs/
+chown -v lfs $LFS/tools
+chown -v lfs $LFS/sources
+chown -v lfs $LFS/scripts
