@@ -96,8 +96,11 @@ esac
 
 cd $LFS/scripts
 git clone https://github.com/eloevenb/ft_linux.git .
-cd
+cd -
+
 chown -R lfs:lfs /mnt/lfs/
 chown -v lfs $LFS/tools
 chown -v lfs $LFS/sources
 chown -v lfs $LFS/scripts
+
+bash $LFS/scripts/2-get-sources.sh
