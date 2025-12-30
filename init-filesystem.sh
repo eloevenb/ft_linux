@@ -76,8 +76,8 @@ fi
 
 if [ ! -f "$LFS/sources/wget-list" ]; then
 	echo -e "${GREEN}[Fetching wget-list]${NC}"
-	wget --input-file="https://www.fr.linuxfromscratch.org/view/lfs-8.2-fr/wget-list" --continue --directory-prefix=$LFS/sources
-	wget "https://www.fr.linuxfromscratch.org/view/lfs-8.2-fr/md5sums" --continue --directory-prefix=$LFS/sources
+	wget --input-file="https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/wget-list" --continue --directory-prefix=$LFS/sources
+	wget "https://www.linuxfromscratch.org/museum/lfs-museum/8.2/md5sums" --continue --directory-prefix=$LFS/sources
 	echo -e "${YELLOW}[Patching ftp.gnu.org URLs to ftpmirror.gnu.org]${NC}"
 	sed -i 's|ftp.gnu.org|ftpmirror.gnu.org|g' $LFS/sources/wget-list
 	cd $LFS/sources
