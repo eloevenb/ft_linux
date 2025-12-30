@@ -75,13 +75,13 @@ if [ ! -d "$LFS/sources" ]; then
 fi
 
 if [ ! -f "$LFS/sources/wget-list" ]; then
-	echo -e "${GREEN}[Fetching wget-list]${NC}"
-	wget --input-file="https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/wget-list" --continue --directory-prefix=$LFS/sources
-	wget "https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/md5sums" --continue --directory-prefix=$LFS/sources
-	echo -e "${YELLOW}[Patching ftp.gnu.org URLs to ftpmirror.gnu.org]${NC}"
-	sed -i 's|ftp.gnu.org|ftpmirror.gnu.org|g' $LFS/sources/wget-list
-	cd $LFS/sources
-	wget --input-file=wget-list --continue --directory-prefix=$LFS/sources
+    echo -e "${GREEN}[Fetching wget-list]${NC}"
+    wget "https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/wget-list" --continue --directory-prefix=$LFS/sources
+    wget "https://raw.githubusercontent.com/eloevenb/ft_linux/refs/heads/main/md5sums" --continue --directory-prefix=$LFS/sources
+    echo -e "${YELLOW}[Patching ftp.gnu.org URLs to ftpmirror.gnu.org]${NC}"
+    sed -i 's|ftp.gnu.org|ftpmirror.gnu.org|g' $LFS/sources/wget-list
+    cd $LFS/sources
+    wget --input-file=wget-list --continue --directory-prefix=$LFS/sources
 fi
 
 chown root:root $LFS/sources/*
