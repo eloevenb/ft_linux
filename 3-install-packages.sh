@@ -37,9 +37,9 @@ echo -e "${GREEN}[Installing packages]${NC}"
 		--with-lib-path=/tools/lib \
 		--target=$LFS_TGT \
 		--disable-nls \
-		--disable-werror
-	make
-	make install
+		--disable-werror > /dev/null
+	make > /dev/null
+	make install > /dev/null
 	clean_up binutils-2.30
 }
 echo -e "${GREEN}[Binutils installed]${NC}"
@@ -95,9 +95,9 @@ echo -e "${GREEN}[Binutils installed]${NC}"
 		--disable-libssp \
 		--disable-libvtv \
 		--disable-libstdcxx \
-		--enable-languages=c,c++
-	make
-	make install
+		--enable-languages=c,c++ > /dev/null
+	make > /dev/null
+	make install > /dev/null
 	clean_up gcc-7.3.0
 }
 echo -e "${GREEN}[GCC installed]${NC}"
