@@ -39,29 +39,49 @@ if swapon --show=NAME | grep -q '^/dev/sda3'; then
 fi
 
 
-# Wipe disk and create all partitions in order
-echo -e "${YELLOW}[WIPING ALL PARTITIONS ON ${DISK} - DATA LOSS WARNING]${NC}"
-sgdisk --zap-all ${DISK}
-parted "${DISK}" --script -- mklabel gpt
 
-echo -e "${YELLOW}[Creating boot partition: ${BOOT_START}MiB - ${BOOT_END}MiB (${BOOT_SIZE}MiB)]${NC}"
-parted "${DISK}" --script -- mkpart primary ext4 ${BOOT_START}MiB ${BOOT_END}MiB
-echo -e "${YELLOW}[Setting boot flag on partition 1]${NC}"
-parted "${DISK}" --script -- set 1 boot on
-echo -e "${GREEN}[Formatting boot partition as ext4]${NC}"
-mkfs.ext4 -L "BOOT" "${DISK}1"
+# Idempotent partitioning and formatting
+NEED_PARTITIONING=false
 
-echo -e "${YELLOW}[Creating root partition: ${ROOT_START}MiB - ${ROOT_END}MiB (${ROOT_SIZE}MiB)]${NC}"
-parted "${DISK}" --script -- mkpart primary ext4 ${ROOT_START}MiB ${ROOT_END}MiB
-echo -e "${GREEN}[Formatting root partition as ext4]${NC}"
-mkfs.ext4 -L "ROOT" "${DISK}2"
+# Check boot partition
+if ! blkid ${BOOT_PART} | grep -q 'TYPE="ext4"'; then
+	NEED_PARTITIONING=true
+fi
+# Check root partition
+if ! blkid ${ROOT_PART} | grep -q 'TYPE="ext4"'; then
+	NEED_PARTITIONING=true
+fi
+# Check swap partition
+if ! blkid ${SWAP_PART} | grep -q 'TYPE="swap"'; then
+	NEED_PARTITIONING=true
+fi
 
-echo -e "${YELLOW}[Creating swap partition: ${SWAP_START}MiB - ${SWAP_END}MiB (${SWAP_SIZE}MiB)]${NC}"
-parted "${DISK}" --script -- mkpart primary linux-swap ${SWAP_START}MiB ${SWAP_END}MiB
-echo -e "${GREEN}[Creating swap on partition 3]${NC}"
-mkswap -L "SWAP" "${DISK}3"
-partprobe ${DISK}
-sleep 2
+if $NEED_PARTITIONING; then
+	echo -e "${YELLOW}[WIPING AND RECREATING PARTITIONS ON ${DISK} - DATA LOSS WARNING]${NC}"
+	sgdisk --zap-all ${DISK}
+	parted "${DISK}" --script -- mklabel gpt
+
+	echo -e "${YELLOW}[Creating boot partition: ${BOOT_START}MiB - ${BOOT_END}MiB (${BOOT_SIZE}MiB)]${NC}"
+	parted "${DISK}" --script -- mkpart primary ext4 ${BOOT_START}MiB ${BOOT_END}MiB
+	echo -e "${YELLOW}[Setting boot flag on partition 1]${NC}"
+	parted "${DISK}" --script -- set 1 boot on
+	echo -e "${GREEN}[Formatting boot partition as ext4]${NC}"
+	mkfs.ext4 -L "BOOT" "${DISK}1"
+
+	echo -e "${YELLOW}[Creating root partition: ${ROOT_START}MiB - ${ROOT_END}MiB (${ROOT_SIZE}MiB)]${NC}"
+	parted "${DISK}" --script -- mkpart primary ext4 ${ROOT_START}MiB ${ROOT_END}MiB
+	echo -e "${GREEN}[Formatting root partition as ext4]${NC}"
+	mkfs.ext4 -L "ROOT" "${DISK}2"
+
+	echo -e "${YELLOW}[Creating swap partition: ${SWAP_START}MiB - ${SWAP_END}MiB (${SWAP_SIZE}MiB)]${NC}"
+	parted "${DISK}" --script -- mkpart primary linux-swap ${SWAP_START}MiB ${SWAP_END}MiB
+	echo -e "${GREEN}[Creating swap on partition 3]${NC}"
+	mkswap -L "SWAP" "${DISK}3"
+	partprobe ${DISK}
+	sleep 2
+else
+	echo -e "${GREEN}[Partitions and filesystems already set up, skipping partitioning]${NC}"
+fi
 
 echo -e "${GREEN}[Partition table:]${NC}"
 parted "${DISK}" print
@@ -170,5 +190,15 @@ cd $LFS/scripts
 git pull
 cd -
 
-bash $LFS/scripts/2-get-sources.sh
+# Check md5sums before downloading packages
+echo -e "${YELLOW}[Verifying source file checksums before download]${NC}"
+pushd $LFS/sources
+if md5sum -c md5sums | grep -q 'FAILED'; then
+    echo -e "${YELLOW}[Some checksums failed, downloading packages...]${NC}"
+    bash $LFS/scripts/2-get-sources.sh
+else
+    echo -e "${GREEN}[All source checksums OK, skipping download]${NC}"
+fi
+popd
+
 bash $LFS/scripts/3-install-packages.sh
