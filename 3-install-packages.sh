@@ -3,7 +3,7 @@
 set -e
 
 LFS=/mnt/lfs
-LFS_TGT=$(uname -m)-eloevenb
+LFS_TGT=$(uname -m)-lfs-linux-gnu
 export MAKEFLAGS='-j$(nproc)'
 cd $LFS/sources
 
