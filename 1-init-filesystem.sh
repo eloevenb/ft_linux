@@ -139,6 +139,9 @@ if [ ! -d "$LFS/scripts/.git" ]; then
 	git clone https://github.com/eloevenb/ft_linux.git .
 	cd -
 else
+	cd $LFS/scripts
+	git pull
+	cd -
 	echo -e "${GREEN}[Scripts already cloned]${NC}"
 fi
 
