@@ -139,16 +139,21 @@ if [ ! -d "$LFS/scripts/.git" ]; then
 	git clone https://github.com/eloevenb/ft_linux.git .
 	cd -
 else
-	cd $LFS/scripts
-	git pull
-	cd -
-	echo -e "${GREEN}[Scripts already cloned]${NC}"
+	echo -e "${GREEN}[Scripts already cloned, updating...]${NC}"
 fi
 
 chown -R lfs:lfs /mnt/lfs/
 chown -v lfs $LFS/tools
 chown -v lfs $LFS/sources
 chown -v lfs $LFS/scripts
+
+# Configure git safe directory for lfs user
+su - lfs -c "git config --global --add safe.directory $LFS/scripts"
+
+# Pull latest changes as lfs user
+if [ -d "$LFS/scripts/.git" ]; then
+	su - lfs -c "cd $LFS/scripts && git pull"
+fi
 
 bash $LFS/scripts/2-get-sources.sh
 bash $LFS/scripts/3-install-packages.sh
