@@ -58,7 +58,7 @@ http://ftpmirror.gnu.org/gnu/patch/patch-2.7.6.tar.xz
 http://www.cpan.org/src/5.0/perl-5.26.1.tar.xz
 https://pkg-config.freedesktop.org/releases/pkg-config-0.29.2.tar.gz
 http://sourceforge.net/projects/procps-ng/files/Production/procps-ng-3.3.12.tar.xz
-https://sourceforge.net/projects/psmisc/files/psmisc/Archive/psmisc-23.1.tar.xz/download
+https://sourceforge.net/projects/psmisc/files/psmisc/Archive/psmisc-23.1.tar.xz
 https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz
 https://docs.python.org/ftp/python/doc/3.6.4/python-3.6.4-docs-html.tar.bz2
 http://ftpmirror.gnu.org/gnu/readline/readline-7.0.tar.gz
@@ -77,7 +77,7 @@ https://www.kernel.org/pub/linux/utils/util-linux/v2.31/util-linux-2.31.1.tar.xz
 https://github.com/vim/vim/archive/refs/tags/v8.0.0586.tar.gz
 http://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-Parser-2.44.tar.gz
 http://tukaani.org/xz/xz-5.2.3.tar.xz
-https://github.com/alinux-build/zlib/blob/master/zlib-1.2.11.tar.xz?raw=true
+https://raw.githubusercontent.com/alinux-build/zlib/master/zlib-1.2.11.tar.xz
 http://www.linuxfromscratch.org/patches/lfs/8.2/bzip2-1.0.6-install_docs-1.patch
 http://www.linuxfromscratch.org/patches/lfs/8.2/coreutils-8.29-i18n-1.patch
 http://www.linuxfromscratch.org/patches/lfs/8.2/glibc-2.27-fhs-1.patch
