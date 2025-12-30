@@ -10,10 +10,11 @@ SWAP_PART="/dev/sda3"
 BOOT_PART="/dev/sda1"
 ROOT_PART="/dev/sda2"
 
+
 # Calculate in megabytes
 DISK_SIZE=$(blockdev --getsize64 /dev/sda | awk '{print int($1/1048576 - 1)""}')
 BOOT_SIZE=$((1024))      # 1 GiB
-SWAP_SIZE=$((4 * 1024))	 # 4 GiB
+SWAP_SIZE=$((4 * 1024))  # 4 GiB
 ROOT_SIZE=$((DISK_SIZE - BOOT_SIZE - SWAP_SIZE))
 
 BOOT_START=1
@@ -21,7 +22,7 @@ BOOT_END=$((BOOT_START + BOOT_SIZE))
 ROOT_START=$BOOT_END
 ROOT_END=$((ROOT_START + ROOT_SIZE))
 SWAP_START=$ROOT_END
-SWAP_END=$((DISK_SIZE))
+SWAP_END=$DISK_SIZE
 
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then
@@ -29,34 +30,38 @@ if [ "$EUID" -ne 0 ]; then
 	exit 1
 fi
 
-# Check if partitions already exist
-if ! blkid "${DISK}1" &>/dev/null; then
-	echo -e "${YELLOW}[Creating GPT partition table on ${DISK}]${NC}"
-	parted "${DISK}" --script -- mklabel gpt
-
-	echo -e "${YELLOW}[Creating boot partition: ${BOOT_START}MiB - ${BOOT_END}MiB (${BOOT_SIZE}MiB)]${NC}"
-	parted "${DISK}" --script -- mkpart primary ext4 ${BOOT_START}MiB ${BOOT_END}MiB
-
-	echo -e "${YELLOW}[Creating root partition: ${ROOT_START}MiB - ${ROOT_END}MiB (${ROOT_SIZE}MiB)]${NC}"
-	parted "${DISK}" --script -- mkpart primary ext4 ${ROOT_START}MiB ${ROOT_END}MiB
-
-	echo -e "${YELLOW}[Creating swap partition: ${SWAP_START}MiB - ${SWAP_END}MiB (${SWAP_SIZE}MiB)]${NC}"
-	parted "${DISK}" --script -- mkpart primary linux-swap ${SWAP_START}MiB ${SWAP_END}MiB
-
-	echo -e "${YELLOW}[Setting boot flag on partition 1]${NC}"
-	parted "${DISK}" --script -- set 1 boot on
-
-	echo -e "${GREEN}[Formatting boot partition as ext4]${NC}"
-	mkfs.ext4 -L "BOOT" "${DISK}1"
-
-	echo -e "${GREEN}[Formatting root partition as ext4]${NC}"
-	mkfs.ext4 -L "ROOT" "${DISK}2"
-
-	echo -e "${GREEN}[Creating swap on partition 3]${NC}"
-	mkswap -L "SWAP" "${DISK}3"
-else
-	echo -e "${GREEN}[Partitions already exist, skipping partitioning]${NC}"
+echo -e "${YELLOW}[Unmounting all /dev/sda partitions and disabling swap]${NC}"
+for mnt in $(mount | grep '^/dev/sda' | awk '{print $3}' | sort -r); do
+    umount -l "$mnt" || true
+done
+if swapon --show=NAME | grep -q '^/dev/sda3'; then
+    swapoff /dev/sda3
 fi
+
+
+# Wipe disk and create all partitions in order
+echo -e "${YELLOW}[WIPING ALL PARTITIONS ON ${DISK} - DATA LOSS WARNING]${NC}"
+sgdisk --zap-all ${DISK}
+parted "${DISK}" --script -- mklabel gpt
+
+echo -e "${YELLOW}[Creating boot partition: ${BOOT_START}MiB - ${BOOT_END}MiB (${BOOT_SIZE}MiB)]${NC}"
+parted "${DISK}" --script -- mkpart primary ext4 ${BOOT_START}MiB ${BOOT_END}MiB
+echo -e "${YELLOW}[Setting boot flag on partition 1]${NC}"
+parted "${DISK}" --script -- set 1 boot on
+echo -e "${GREEN}[Formatting boot partition as ext4]${NC}"
+mkfs.ext4 -L "BOOT" "${DISK}1"
+
+echo -e "${YELLOW}[Creating root partition: ${ROOT_START}MiB - ${ROOT_END}MiB (${ROOT_SIZE}MiB)]${NC}"
+parted "${DISK}" --script -- mkpart primary ext4 ${ROOT_START}MiB ${ROOT_END}MiB
+echo -e "${GREEN}[Formatting root partition as ext4]${NC}"
+mkfs.ext4 -L "ROOT" "${DISK}2"
+
+echo -e "${YELLOW}[Creating swap partition: ${SWAP_START}MiB - ${SWAP_END}MiB (${SWAP_SIZE}MiB)]${NC}"
+parted "${DISK}" --script -- mkpart primary linux-swap ${SWAP_START}MiB ${SWAP_END}MiB
+echo -e "${GREEN}[Creating swap on partition 3]${NC}"
+mkswap -L "SWAP" "${DISK}3"
+partprobe ${DISK}
+sleep 2
 
 echo -e "${GREEN}[Partition table:]${NC}"
 parted "${DISK}" print
@@ -67,6 +72,17 @@ blkid "${DISK}1" "${DISK}2" "${DISK}3"
 mkdir -p /mnt/lfs
 
 export LFS=/mnt/lfs
+
+
+# Unmount all existing /mnt/lfs and /mnt/lfs/boot mountpoints to avoid duplicate mounts
+while mount | grep -q "on $LFS "; do
+	echo -e "${YELLOW}Unmounting duplicate $LFS...${NC}"
+	umount -l $LFS
+done
+while mount | grep -q "on $LFS/boot "; do
+	echo -e "${YELLOW}Unmounting duplicate $LFS/boot...${NC}"
+	umount -l $LFS/boot
+done
 
 echo -e "${YELLOW}[Mounting LFS partitions]${NC}"
 if ! mountpoint -q $LFS; then
@@ -89,15 +105,15 @@ else
 	echo -e "${GREEN}[Swap already active]${NC}"
 fi
 
-mkdir -pv $LFS/{etc,var} $LFS/usr/{bin,lib,sbin} $LFS/tools $LFS/scripts
+mkdir -pv $LFS/{etc,var,tools,scripts,sources,usr/{bin,lib,sbin}}
 ln -sfv $LFS/tools /
 
 for i in bin lib sbin; do
-	ln -sfv usr/$i $LFS/$i
+    ln -sfv usr/$i $LFS/$i
 done
 
 case $(uname -m) in
-	x86_64) ln -sfv lib $LFS/lib64 ;;
+    x86_64) ln -sfv lib $LFS/lib64 ;;
 esac
 
 if ! getent group lfs > /dev/null 2>&1; then
@@ -143,17 +159,16 @@ else
 fi
 
 chown -R lfs:lfs /mnt/lfs/
+
 chown -v lfs $LFS/tools
 chown -v lfs $LFS/sources
 chown -v lfs $LFS/scripts
 
-# Configure git safe directory for lfs user
-su - lfs -c "git config --global --add safe.directory $LFS/scripts"
+git config --global --add safe.directory $LFS/scripts
 
-# Pull latest changes as lfs user
-if [ -d "$LFS/scripts/.git" ]; then
-	su - lfs -c "cd $LFS/scripts && git pull"
-fi
+cd $LFS/scripts
+git pull
+cd -
 
 bash $LFS/scripts/2-get-sources.sh
 bash $LFS/scripts/3-install-packages.sh
