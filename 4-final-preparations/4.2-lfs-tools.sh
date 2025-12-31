@@ -21,8 +21,4 @@ mkdir -v $LFS/tools
 
 ln -sv $LFS/tools /
 
-# Add the scripts directory
-mkdir -v $LFS/scripts
-
-ln -sv /root/ft_linux $LFS/scripts
 chmod -R a+rx /root/ft_linux

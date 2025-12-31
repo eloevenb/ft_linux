@@ -80,8 +80,6 @@ cd build
   --disable-libssp \
   --disable-libvtv \
   --disable-libstdcxx \
-  --disable-debug \
-  --disable-objc \
   --enable-languages=c,c++
 
 make
