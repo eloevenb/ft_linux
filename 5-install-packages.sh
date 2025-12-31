@@ -28,7 +28,6 @@ clean_up() {
 	fi
 }
 
-echo -e "${GREEN}[Binutils installed]${NC}"
 
 echo -e "${GREEN}[Installing packages]${NC}"
 # Binutils
@@ -115,3 +114,36 @@ echo -e "${GREEN}[GCC installed]${NC}"
 	cp -rv dest/include/* /tools/include
 	clean_up linux-4.15.0
 }
+echo -e "${GREEN}[Linux API headers installed]${NC}"
+
+# Glibc
+{
+	tar -xf glibc-2.27.tar.xz
+	cd glibc-2.27
+	create_build_dir
+	../configure --prefix=/tools \
+		--host=$LFS_TGT \
+		--build=$(../scripts/config.guess) \
+		--with-headers=/tools/include \
+		--enable-kernel=3.2 \
+		--disable-multilib \
+		libc_cv_forced_unwind=yes \
+		libc_cv_c_cleanup=yes
+	make
+	make install
+	clean_up glibc-2.27
+}
+
+# Toolchain sanity check
+
+echo -e "${YELLOW}[Performing toolchain sanity check]${NC}"
+echo 'int main(){}' > dummy.c
+$LFS_TGT-gcc dummy.c > /dev/null 2>&1
+if readelf -l a.out | grep -q '/tools/'; then
+    echo -e "${GREEN}[Toolchain sanity check PASSED]${NC}"
+    rm -v dummy.c a.out
+else
+    echo -e "${RED}[Toolchain sanity check FAILED]${NC}"
+    rm -f dummy.c a.out
+    exit 1
+fi
