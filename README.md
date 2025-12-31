@@ -12,3 +12,23 @@ Then start the sshd service to connect from the host machine
 rc-service sshd start
 ```
 Now you can connect via SSH to be able to copy and paste scripts
+```
+ip a
+ssh root@192.168.x.x
+```
+
+## 0.1 Clone repository
+As root :
+```
+git clone https://github.com/eloevenb/ft_linux.git
+cd ft_linux
+chmod a+rx ./*.sh
+```
+
+## 1.0 Initialize the filesystems
+Start as Root :
+```
+./1-setup-filesystems.sh
+./2-directory-tree.sh
+./3-lfs-user.sh
+```
