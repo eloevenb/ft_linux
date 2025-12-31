@@ -32,3 +32,11 @@ Start as Root :
 ./2-directory-tree.sh
 ./3-lfs-user.sh
 ```
+
+# 2.0 Install the packages
+As the user lfs :
+```
+cd $LFS/scripts
+./4-get-sources.sh
+./5-install-packages.sh
+```
