@@ -20,7 +20,7 @@ tarball="tcl8.6.8-src"
 # Generic build steps  #
 ########################
 cd $LFS/sources
-tar -xvf $tarball.tar.xz
+tar -xvzf $tarball.tar.gz
 if [ ! -d $LFS/sources/$tarball ]; then
   echo "ERROR: Unable to extract tarball named $tarball, check the file extensions"
   exit 1
