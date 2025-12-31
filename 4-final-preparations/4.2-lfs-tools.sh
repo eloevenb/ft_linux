@@ -20,3 +20,8 @@ fi
 mkdir -v $LFS/tools
 
 ln -sv $LFS/tools /
+
+# Add the scripts directory
+mkdir -v $LFS/scripts
+
+ln -sv $LFS/scripts /root/ft_linux
