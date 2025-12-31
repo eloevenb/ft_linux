@@ -14,7 +14,7 @@ fi
 ################
 # Tarball name #
 ################
-tarball="tcl8.6.8-src"
+tarball="expect5.45.4"
 
 ########################
 # Generic build steps  #
@@ -30,16 +30,16 @@ cd $tarball
 ########################
 # Specific build steps #
 ########################
-cd unix
-./configure --prefix=/tools
+cp -v configure{,.orig}
+sed 's:/usr/local/bin:/tools/bin:g' configure.orig > configure
+
+./configure --prefix=/tools --with-tcl=/tools/lib --with-tclinclude=/tools/include
+
 make
-TZ=UTC make test
 
-make install
-chmod -v u+w /tools/lib/libtcl8.6.so
-make install-private-headers
+make test
 
-ln -sv tclsh8.6 /tools/bin/tclsh
+make SCRIPTS="" install
 
 #########################
 # Generic cleanup steps #

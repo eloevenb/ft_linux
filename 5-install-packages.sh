@@ -197,7 +197,8 @@ else
         --disable-libstdcxx-pch                        \
         --disable-multilib                             \
         --disable-bootstrap                            \
-        --disable-libgomp
+        --disable-libgomp                              \
+        --disable-debug
 
 
     make

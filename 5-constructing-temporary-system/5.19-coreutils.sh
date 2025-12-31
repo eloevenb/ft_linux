@@ -14,7 +14,7 @@ fi
 ################
 # Tarball name #
 ################
-tarball="tcl8.6.8-src"
+tarball="coreutils-8.29"
 
 ########################
 # Generic build steps  #
@@ -30,16 +30,14 @@ cd $tarball
 ########################
 # Specific build steps #
 ########################
-cd unix
-./configure --prefix=/tools
+./configure --prefix=/tools --enable-install-program=hostname
+
 make
-TZ=UTC make test
+
+make RUN_EXPENSIVE_TESTS=yes check
 
 make install
-chmod -v u+w /tools/lib/libtcl8.6.so
-make install-private-headers
 
-ln -sv tclsh8.6 /tools/bin/tclsh
 
 #########################
 # Generic cleanup steps #

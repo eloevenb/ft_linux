@@ -14,7 +14,7 @@ fi
 ################
 # Tarball name #
 ################
-tarball="binutils-2.30"
+tarball="gcc-7.3.0"
 
 ########################
 # Generic build steps  #

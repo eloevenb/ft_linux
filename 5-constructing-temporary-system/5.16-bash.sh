@@ -14,7 +14,7 @@ fi
 ################
 # Tarball name #
 ################
-tarball="tcl8.6.8-src"
+tarball="bash-4.4.18"
 
 ########################
 # Generic build steps  #
@@ -30,16 +30,15 @@ cd $tarball
 ########################
 # Specific build steps #
 ########################
-cd unix
-./configure --prefix=/tools
+./configure --prefix=/tools --without-bash-malloc
+
 make
-TZ=UTC make test
+
+make tests
 
 make install
-chmod -v u+w /tools/lib/libtcl8.6.so
-make install-private-headers
 
-ln -sv tclsh8.6 /tools/bin/tclsh
+ln -sv bash /tools/bin/sh
 
 #########################
 # Generic cleanup steps #

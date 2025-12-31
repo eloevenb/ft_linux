@@ -14,7 +14,7 @@ fi
 ################
 # Tarball name #
 ################
-tarball="tcl8.6.8-src"
+tarball="ncurses-6.1"
 
 ########################
 # Generic build steps  #
@@ -30,16 +30,18 @@ cd $tarball
 ########################
 # Specific build steps #
 ########################
-cd unix
-./configure --prefix=/tools
+sed -i 's/mawk//g' configure
+
+./configure --prefix=/tools           \
+			--with-shared              \
+			--without-debug            \
+			--without-ada              \
+			--enable-widec             \
+			--enable-overwrite
+
 make
-TZ=UTC make test
 
 make install
-chmod -v u+w /tools/lib/libtcl8.6.so
-make install-private-headers
-
-ln -sv tclsh8.6 /tools/bin/tclsh
 
 #########################
 # Generic cleanup steps #
