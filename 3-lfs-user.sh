@@ -46,6 +46,5 @@ chown -v lfs $LFS/tools
 chown -v lfs $LFS/sources
 chown -v lfs $LFS/scripts
 
-cp /root/ft_linux/*.sh /mnt/lfs/scripts/
-chmod +x /mnt/lfs/scripts/*.sh
+cp -R /root/ft_linux/* /mnt/lfs/scripts/
 chown -R lfs:lfs /mnt/lfs/scripts/
