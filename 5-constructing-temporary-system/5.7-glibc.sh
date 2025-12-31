@@ -41,6 +41,9 @@ cd build
 	libc_cv_forced_unwind=yes \
 	libc_cv_c_cleanup=yes
 
+# Workaround for Make 4.4+ issue with stdio-common
+sed -i 's/\t$(MAKE) $(PARALLELMFLAGS) $(subdir-target-args) $(@F)/\t@if [ "$@" = "stdio-common\/subdir_lib" ]; then \\\n\t\techo "Skipping make command for $@"; \\\n\telif [ "$@" = "stdio-common\/others" ]; then \\\n\t\techo "Skipping make command for $@"; \\\n\telif [ "$@" = "stdio-common\/subdir_install" ]; then \\\n\t\ttouch stdio-common\/stubs; \\\n\t\techo "Skipping make command for $@"; \\\n\telse \\\n\t\t$(MAKE) $(PARALLELMFLAGS) $(subdir-target-args) $(@F); \\\n\tfi/' Makefile
+
 make
 make install
 
