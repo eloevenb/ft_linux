@@ -21,4 +21,4 @@ mkdir -v $LFS/tools
 
 ln -sv $LFS/tools /
 
-chmod -R a+rx /root/ft_linux
+chmod -R a+rx /scripts
