@@ -5,14 +5,14 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-DISK="/dev/sda"
-SWAP_PART="/dev/sda3"
-BOOT_PART="/dev/sda1"
-ROOT_PART="/dev/sda2"
+DISK="/dev/sdb"
+SWAP_PART="/dev/sdb3"
+BOOT_PART="/dev/sdb1"
+ROOT_PART="/dev/sdb2"
 
 
 # Calculate in megabytes
-DISK_SIZE=$(blockdev --getsize64 /dev/sda | awk '{print int($1/1048576 - 1)""}')
+DISK_SIZE=$(blockdev --getsize64 /dev/sdb | awk '{print int($1/1048576 - 1)""}')
 BOOT_SIZE=$((1024))      # 1 GiB
 SWAP_SIZE=$((4 * 1024))  # 4 GiB
 ROOT_SIZE=$((DISK_SIZE - BOOT_SIZE - SWAP_SIZE))
@@ -30,12 +30,12 @@ if [ "$EUID" -ne 0 ]; then
 	exit 1
 fi
 
-echo -e "${YELLOW}[Unmounting all /dev/sda partitions and disabling swap]${NC}"
-for mnt in $(mount | grep '^/dev/sda' | awk '{print $3}' | sort -r); do
+echo -e "${YELLOW}[Unmounting all /dev/sdb partitions and disabling swap]${NC}"
+for mnt in $(mount | grep '^/dev/sdb' | awk '{print $3}' | sort -r); do
     umount -l "$mnt" || true
 done
-if swapon --show=NAME | grep -q '^/dev/sda3'; then
-    swapoff /dev/sda3
+if swapon --show=NAME | grep -q '^/dev/sdb3'; then
+    swapoff /dev/sdb3
 fi
 
 
