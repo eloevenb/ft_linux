@@ -33,7 +33,7 @@ echo -e "${GREEN}[Binutils installed]${NC}"
 echo -e "${GREEN}[Installing packages]${NC}"
 # Binutils
 {
-	tar -xf binutils-2.30.tar.xz > /dev/null
+	tar -xf binutils-2.30.tar.xz
 	cd binutils-2.30
 	create_build_dir
 	../configure --prefix=/tools \
@@ -41,9 +41,9 @@ echo -e "${GREEN}[Installing packages]${NC}"
 		--with-lib-path=/tools/lib \
 		--target=$LFS_TGT \
 		--disable-nls \
-		--disable-werror > /dev/null
-	make > /dev/null
-	make install > /dev/null
+		--disable-werror
+	make
+	make install
 	clean_up binutils-2.30
 }
 echo -e "${GREEN}[Binutils installed]${NC}"
@@ -59,6 +59,24 @@ echo -e "${GREEN}[Binutils installed]${NC}"
 	tar -xf ../mpc-1.1.0.tar.gz
 	mv -v mpc-1.1.0 mpc
 
+	for file in gcc/config/{linux,i386/linux{,64}}.h
+	do
+	cp -uv $file{,.orig}
+	sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&@g' \
+	-e 's@/usr@/tools@g' $file.orig > $file
+	echo '
+#undef STANDARD_STARTFILE_PREFIX_1
+#undef STANDARD_STARTFILE_PREFIX_2
+#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+#define STANDARD_STARTFILE_PREFIX_2 ""' >> $file
+	touch $file.orig
+	done
+	case $(uname -m) in
+	x86_64)
+	sed -e '/m64=/s/lib64/lib/' \
+	-i.orig gcc/config/i386/t-linux64
+	;;
+	esac
 	create_build_dir
 	../configure \
 		--target=$LFS_TGT \
@@ -81,9 +99,19 @@ echo -e "${GREEN}[Binutils installed]${NC}"
 		--disable-libssp \
 		--disable-libvtv \
 		--disable-libstdcxx \
-		--enable-languages=c,c++ > /dev/null
-	make > /dev/null
-	make install > /dev/null
+		--enable-languages=c,c++
+	make
+	make install
 	clean_up gcc-7.3.0
 }
 echo -e "${GREEN}[GCC installed]${NC}"
+
+# Linux API headers
+{
+	tar -xf linux-4.15.0.tar.xz
+	cd linux-4.15.0
+	make mrproper
+	make INSTALL_HDR_PATH=dest headers_install
+	cp -rv dest/include/* /tools/include
+	clean_up linux-4.15.0
+}
