@@ -31,9 +31,11 @@ cd $tarball
 # Specific build steps #
 ########################
 cp -v configure{,.orig}
-sed 's:/usr/local/bin:/tools/bin:g' configure.orig > configure
+sed 's:/usr/local/bin:/bin:' configure.orig > configure
 
-./configure --prefix=/tools --with-tcl=/tools/lib --with-tclinclude=/tools/include
+./configure --prefix=/tools \
+	--with-tcl=/tools/lib \
+	--with-tclinclude=/tools/include
 
 make
 

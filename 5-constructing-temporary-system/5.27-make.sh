@@ -20,7 +20,7 @@ tarball="make-4.2.1"
 # Generic build steps  #
 ########################
 cd $LFS/sources
-tar -xvf $tarball.tar.xz
+tar -xvjf $tarball.tar.bz2
 if [ ! -d $LFS/sources/$tarball ]; then
   echo "ERROR: Unable to extract tarball named $tarball, check the file extensions"
   exit 1
