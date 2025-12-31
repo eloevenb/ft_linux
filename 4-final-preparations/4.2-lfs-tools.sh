@@ -25,3 +25,4 @@ ln -sv $LFS/tools /
 mkdir -v $LFS/scripts
 
 ln -sv $LFS/scripts /root/ft_linux
+chmod -R a+rx $LFS/scripts
