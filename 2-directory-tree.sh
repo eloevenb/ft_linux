@@ -6,7 +6,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 echo -e "${YELLOW}[Creating LFS directory structure]${NC}"
-mkdir -pv $LFS/{etc,var,scripts,sources,usr/{bin,lib,sbin}}
+mkdir -pv $LFS/{etc,var,tools,scripts,sources,usr/{bin,lib,sbin}}
 ln -sfv $LFS/tools /
 
 for i in bin lib sbin; do
